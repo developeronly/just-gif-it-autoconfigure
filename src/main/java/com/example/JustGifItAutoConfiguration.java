@@ -5,11 +5,11 @@ import com.example.services.GifEncoderService;
 import com.example.services.VideoDecoderService;
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,19 +20,20 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.inject.Inject;
 import java.io.File;
 
 @Configuration
 @ConditionalOnClass({FFmpegFrameGrabber.class, AnimatedGifEncoder.class})
 public class JustGifItAutoConfiguration {
 
-    @Value("${multipart.location}/gif/")
-    private String gifLocation;
+    @Inject
+    private JustGifItProperties properties;
 
     @Bean
     @ConditionalOnProperty(prefix = "com.example", name = "create-result-directory")
     public boolean createResultDirectory() {
-        File gifFolder = new File(gifLocation);
+        File gifFolder = new File(properties.getGifLocation());
         if (!gifFolder.exists()) {
             gifFolder.mkdir();
         }
@@ -60,10 +61,11 @@ public class JustGifItAutoConfiguration {
 
     @Configuration
     @ConditionalOnWebApplication
+    @EnableConfigurationProperties(JustGifItProperties.class)
     public static class WebConfiguration {
 
-        @Value("${multipart.location}/gif/")
-        private String gifLocation;
+        @Inject
+        private JustGifItProperties properties;
 
         @Bean
         @ConditionalOnProperty(prefix = "com.example", name = "optimize")
@@ -95,7 +97,7 @@ public class JustGifItAutoConfiguration {
                 @Override
                 public void addResourceHandlers(ResourceHandlerRegistry registry) {
                     registry.addResourceHandler("/gif/**")
-                            .addResourceLocations("file:" + gifLocation);
+                            .addResourceLocations("file:" + properties.getGifLocation());
                     super.addResourceHandlers(registry);
                 }
             };
