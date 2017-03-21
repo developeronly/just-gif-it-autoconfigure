@@ -2,17 +2,19 @@ package com.example;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.io.File;
+
 @ConfigurationProperties(prefix = "com.example")
 public class JustGifItProperties {
 
-    private String gifLocation;
+    private File gifLocation;
     private Boolean optimize;
 
-    public String getGifLocation() {
+    public File getGifLocation() {
         return gifLocation;
     }
 
-    public void setGifLocation(String gifLocation) {
+    public void setGifLocation(File gifLocation) {
         this.gifLocation = gifLocation;
     }
 
@@ -23,5 +25,5 @@ public class JustGifItProperties {
     public void setOptimize(Boolean optimize) {
         this.optimize = optimize;
     }
-    
+
 }

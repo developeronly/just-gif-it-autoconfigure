@@ -5,6 +5,7 @@ import com.example.services.GifEncoderService;
 import com.example.services.VideoDecoderService;
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,7 +22,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.inject.Inject;
-import java.io.File;
 
 @Configuration
 @ConditionalOnClass({FFmpegFrameGrabber.class, AnimatedGifEncoder.class})
@@ -33,9 +33,8 @@ public class JustGifItAutoConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "com.example", name = "create-result-directory")
     public boolean createResultDirectory() {
-        File gifFolder = new File(properties.getGifLocation());
-        if (!gifFolder.exists()) {
-            gifFolder.mkdir();
+        if (!properties.getGifLocation().exists()) {
+            properties.getGifLocation().mkdir();
         }
 
         return true;
@@ -64,8 +63,11 @@ public class JustGifItAutoConfiguration {
     @EnableConfigurationProperties(JustGifItProperties.class)
     public static class WebConfiguration {
 
-        @Inject
-        private JustGifItProperties properties;
+/*        @Inject
+        private JustGifItProperties properties;*/
+
+        @Value("${multipart.location}/gif/")
+        private String gifLocation;
 
         @Bean
         @ConditionalOnProperty(prefix = "com.example", name = "optimize")
@@ -97,7 +99,7 @@ public class JustGifItAutoConfiguration {
                 @Override
                 public void addResourceHandlers(ResourceHandlerRegistry registry) {
                     registry.addResourceHandler("/gif/**")
-                            .addResourceLocations("file:" + properties.getGifLocation());
+                            .addResourceLocations("file:" + gifLocation);
                     super.addResourceHandlers(registry);
                 }
             };
